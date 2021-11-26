@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.rislah.logindetection.LoginDetectionTopologyTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2021-11-24T02:29:41" hostname="pc" time="0.44">
+  <properties/>
+  <testcase name="testUserLoginAttemptSuccess()" classname="com.rislah.logindetection.LoginDetectionTopologyTest" time="0.423"/>
+  <testcase name="testUserLoginAttemptFailure()" classname="com.rislah.logindetection.LoginDetectionTopologyTest" time="0.016"/>
+  <system-out><![CDATA[2021-11-24 04:29:41,954 [Test worker] WARN  o.a.k.s.p.internals.StateDirectory - Using an OS temp directory in the state.dir property can cause failures with writing the checkpoint file due to the fact that this directory can be cleared by the OS. Resolved state.dir: [/tmp/kafka-streams]
+2021-11-24 04:29:42,192 [Test worker] WARN  o.a.k.s.p.internals.StateDirectory - Using an OS temp directory in the state.dir property can cause failures with writing the checkpoint file due to the fact that this directory can be cleared by the OS. Resolved state.dir: [/tmp/kafka-streams]
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
