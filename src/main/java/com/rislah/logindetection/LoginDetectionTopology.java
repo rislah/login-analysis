@@ -1,7 +1,6 @@
 package com.rislah.logindetection;
 
 import com.rislah.logindetection.model.UserLoginAttempt;
-import com.rislah.logindetection.model.UserLoginAttemptEnriched;
 import com.rislah.logindetection.model.serialization.JsonSerdes;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
@@ -23,11 +22,10 @@ public class LoginDetectionTopology {
 
   public KStream<Integer, UserLoginAttempt> unknownIpsStream(
       KTable<String, UserLoginAttempt> knownIpsTable,
-      KStream<Void, UserLoginAttempt> userLoginAttemptStream) {
-    ValueJoiner<UserLoginAttempt, UserLoginAttempt, UserLoginAttemptEnriched> unknownValueJoiner =
+      KStream<byte[], UserLoginAttempt> userLoginAttemptStream) {
+    ValueJoiner<UserLoginAttempt, UserLoginAttempt, UserLoginKnown> unknownValueJoiner =
         (left, right) -> {
-          UserLoginAttemptEnriched userLoginAttemptEnriched =
-              new UserLoginAttemptEnriched(left, true);
+          UserLoginKnown userLoginAttemptEnriched = new UserLoginKnown(left, true);
           if (right == null) {
             userLoginAttemptEnriched.setKnown(false);
           }
@@ -50,30 +48,27 @@ public class LoginDetectionTopology {
             Named.as("select_userid_ip_key"))
         .leftJoin(knownIpsTable, unknownValueJoiner, unknownJoinParams)
         .filterNot((k, v) -> v.getKnown(), Named.as("filter_out_known"))
-        .map(
-            (k, v) -> KeyValue.pair(v.getAttempt().getUserId(), v.getAttempt()),
-            Named.as("map_back"));
+        .map((k, v) -> KeyValue.pair(v.attempt.getUserId(), v.attempt), Named.as("map_back"));
   }
 
   public Topology build() {
-    KStream<Void, UserLoginAttempt> loginAttemptStream =
+    KStream<byte[], UserLoginAttempt> loginAttemptStream =
         builder.stream(
-            Topics.USER_LOGIN_ATTEMPT.name(),
-            Consumed.<Void, UserLoginAttempt>as(
-                    String.format("%s_topic", Topics.USER_LOGIN_ATTEMPT.name()))
-                .withKeySerde(Topics.USER_LOGIN_ATTEMPT.keySerde())
-                .withValueSerde(Topics.USER_LOGIN_ATTEMPT.valueSerde()));
-    //                .peek((k, v) -> log.info("{}: [{}] {}", Topics.USER_LOGIN_ATTEMPT.name(), k,
-    // v));
+                Topics.USER_LOGIN_ATTEMPT.name(),
+                Consumed.<byte[], UserLoginAttempt>as(
+                        String.format("%s_topic", Topics.USER_LOGIN_ATTEMPT.name()))
+                    .withKeySerde(Topics.USER_LOGIN_ATTEMPT.keySerde())
+                    .withValueSerde(Topics.USER_LOGIN_ATTEMPT.valueSerde()))
+            .peek((k, v) -> log.info("{}: [{}] {}", Topics.USER_LOGIN_ATTEMPT.name(), k, v));
 
     KStream<Integer, UserLoginAttempt> knownIpsStream =
         builder.stream(
-            Topics.USER_KNOWN_IPS.name(),
-            Consumed.<Integer, UserLoginAttempt>as(
-                    String.format("%s_topic", Topics.USER_KNOWN_IPS.name()))
-                .withKeySerde(Topics.USER_KNOWN_IPS.keySerde())
-                .withValueSerde(Topics.USER_KNOWN_IPS.valueSerde()));
-    //                .peek((k, v) -> log.info("{}: [{}] {}", Topics.USER_KNOWN_IPS.name(), k, v));
+                Topics.USER_KNOWN_IPS.name(),
+                Consumed.<Integer, UserLoginAttempt>as(
+                        String.format("%s_topic", Topics.USER_KNOWN_IPS.name()))
+                    .withKeySerde(Topics.USER_KNOWN_IPS.keySerde())
+                    .withValueSerde(Topics.USER_KNOWN_IPS.valueSerde()))
+            .peek((k, v) -> log.info("{}: [{}] {}", Topics.USER_KNOWN_IPS.name(), k, v));
 
     KTable<String, UserLoginAttempt> knownIpsTable =
         knownIpsStream
@@ -104,5 +99,23 @@ public class LoginDetectionTopology {
             .withValueSerde(Topics.USER_KNOWN_IPS.valueSerde()));
 
     return builder.build();
+  }
+
+  public static class UserLoginKnown {
+    private final UserLoginAttempt attempt;
+    private Boolean isKnown;
+
+    public UserLoginKnown(UserLoginAttempt attempt, Boolean isKnown) {
+      this.attempt = attempt;
+      this.isKnown = isKnown;
+    }
+
+    public Boolean getKnown() {
+      return isKnown;
+    }
+
+    public void setKnown(Boolean known) {
+      isKnown = known;
+    }
   }
 }

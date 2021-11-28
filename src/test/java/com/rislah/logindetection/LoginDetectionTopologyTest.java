@@ -1,11 +1,12 @@
 package com.rislah.logindetection;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.rislah.logindetection.model.UserLoginAttempt;
-import java.util.Properties;
 import org.apache.kafka.streams.*;
 import org.junit.jupiter.api.Test;
+
+import java.util.Properties;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class LoginDetectionTopologyTest {
   public TopologyTestDriver setupTestDriver(Topology topology) {
@@ -20,7 +21,7 @@ public class LoginDetectionTopologyTest {
     LoginDetectionTopology loginDetectionTopology = new LoginDetectionTopology();
 
     try (TopologyTestDriver topologyTestDriver = setupTestDriver(loginDetectionTopology.build())) {
-      TestInputTopic<Void, UserLoginAttempt> userLoginAttemptTopic =
+      TestInputTopic<byte[], UserLoginAttempt> userLoginAttemptTopic =
           topologyTestDriver.createInputTopic(
               Topics.USER_LOGIN_ATTEMPT.name(),
               Topics.USER_LOGIN_ATTEMPT.keySerde().serializer(),
@@ -64,7 +65,7 @@ public class LoginDetectionTopologyTest {
     LoginDetectionTopology loginDetectionTopology = new LoginDetectionTopology();
 
     try (TopologyTestDriver topologyTestDriver = setupTestDriver(loginDetectionTopology.build())) {
-      TestInputTopic<Void, UserLoginAttempt> userLoginAttemptTopic =
+      TestInputTopic<byte[], UserLoginAttempt> userLoginAttemptTopic =
           topologyTestDriver.createInputTopic(
               Topics.USER_LOGIN_ATTEMPT.name(),
               Topics.USER_LOGIN_ATTEMPT.keySerde().serializer(),

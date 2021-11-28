@@ -7,7 +7,7 @@ import org.apache.kafka.common.serialization.Serdes;
 
 public class Topics {
   public static Topic<Integer, UserLoginAttempt> USER_UNKNOWN_IP;
-  public static Topic<Void, UserLoginAttempt> USER_LOGIN_ATTEMPT;
+  public static Topic<byte[], UserLoginAttempt> USER_LOGIN_ATTEMPT;
   public static Topic<Integer, UserLoginAttempt> USER_KNOWN_IPS;
 
   static {
@@ -16,13 +16,13 @@ public class Topics {
 
   private static void createTopics() {
     USER_KNOWN_IPS =
-        new Topic<>("internal.identity.known-ips", Serdes.Integer(), JsonSerdes.UserLoginAttempt());
+        new Topic<>("internal.identity.user.knownips", Serdes.Integer(), JsonSerdes.UserLoginAttempt());
     USER_LOGIN_ATTEMPT =
         new Topic<>(
-            "tracking.identity.login-attempt", Serdes.Void(), JsonSerdes.UserLoginAttempt());
+            "tracking.identity.user.loginattempt", Serdes.ByteArray(), JsonSerdes.UserLoginAttempt());
     USER_UNKNOWN_IP =
         new Topic<>(
-            "tracking.identity.unknown-ip", Serdes.Integer(), JsonSerdes.UserLoginAttempt());
+            "tracking.identity.user.unknowndevice", Serdes.Integer(), JsonSerdes.UserLoginAttempt());
   }
 
   public record Topic<K, V>(String name, Serde<K> keySerde, Serde<V> valueSerde) {}

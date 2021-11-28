@@ -3,7 +3,7 @@ package com.rislah.logindetection.model;
 import com.google.gson.annotations.SerializedName;
 
 public class UserLoginAttempt {
-  @SerializedName("userId")
+  @SerializedName("user_id")
   private Integer userId;
 
   @SerializedName("ip")

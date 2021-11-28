@@ -10,26 +10,41 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://packages.confluent.io/maven"
+    }
+
+    maven {
+        url = 'https://maven.pkg.github.com/rislah/events'
+        credentials {
+            username = "rislah"
+            password = "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"
+        }
+    }
 }
 
-sourceCompatibility = JavaVersion.VERSION_17;
-targetCompatibility = JavaVersion.VERSION_17;
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 application {
     mainClassName = 'com.rislah.logindetection.App'
 }
 
 ext {
+    protobufVersion = '3.19.1'
     kafkaVersion = '3.0.0'
     prometheusExporterVersion = '0.16.1'
 }
 
 dependencies {
+    implementation 'io.confluent:kafka-streams-protobuf-serde:7.0.0'
+    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
     implementation "org.apache.kafka:kafka-streams:${kafkaVersion}"
     implementation 'org.slf4j:slf4j-api:1.7.32'
     implementation 'ch.qos.logback:logback-classic:1.2.7'
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'com.typesafe:config:1.4.1'
+    implementation 'org.rislah:events:0.0.3'
     testImplementation "org.apache.kafka:kafka-streams-test-utils:${kafkaVersion}"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testImplementation 'org.assertj:assertj-core:3.21.0'
